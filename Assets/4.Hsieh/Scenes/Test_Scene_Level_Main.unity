@@ -416,11 +416,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TestLevelStreamer
   player: {fileID: 430279095}
-  level5Scene: Test_Scene_Level_05
-  level4Scene: Test_Scene_Level_04
-  level5CenterY: 150
-  halfLevelHeight: 150
-  unloadMargin: 30
+  levelScenes:
+  - sceneName: Test_Scene_Level_05
+  - sceneName: Test_Scene_Level_04
+  - sceneName: Test_Scene_Level_03
+  - sceneName: Test_Scene_Level_02
+  - sceneName: Test_Scene_Level_01
+  firstLevelTopY: 300
+  levelHeight: 300
+  unloadPreviousProgress: 0.5
+  levelRootName: LevelRoot
 --- !u!4 &1812089756
 Transform:
   m_ObjectHideFlags: 0
@@ -430,7 +435,7 @@ Transform:
   m_GameObject: {fileID: 1812089754}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 7.99103, y: 301.14612, z: -10}
+  m_LocalPosition: {x: 0, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -543,7 +548,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollow
   target: {fileID: 430279095}
-  offset: {x: 0, y: 3, z: 10}
+  offset: {x: 0, y: 3, z: -50}
 --- !u!114 &2098356188
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,128 +1,142 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class TestLevelStreamer : MonoBehaviour
 {
-    [Header("Player")]
-    [SerializeField]
-    private Transform player;
-
-    [Header("Test Scenes")]
-    [SerializeField]
-    private string level5Scene = "Test_Scene_Level_05";
-
-    [SerializeField]
-    private string level4Scene = "Test_Scene_Level_04";
-
-    [Header("Level Settings")]
-    [SerializeField]
-    private float level5CenterY = 150.0f;
-
-    [SerializeField]
-    private float halfLevelHeight = 150.0f;
-
-    [Header("Unload")]
-    [SerializeField]
-    private float unloadMargin = 30.0f;
-
-    private bool enteredLevel4 = false;
-
-    private float SeamWorldY
+    [System.Serializable]
+    public class LevelScene
     {
-        get
-        {
-            return level5CenterY - halfLevelHeight;
-        }
+        public string sceneName;
     }
 
-    private IEnumerator Start()
+    [SerializeField] private Transform player;
+
+    [SerializeField]
+    private LevelScene[] levelScenes =
+    {
+        new LevelScene { sceneName = "Test_Scene_Level_05" },
+        new LevelScene { sceneName = "Test_Scene_Level_04" },
+        new LevelScene { sceneName = "Test_Scene_Level_03" },
+        new LevelScene { sceneName = "Test_Scene_Level_02" },
+        new LevelScene { sceneName = "Test_Scene_Level_01" }
+    };
+
+    [SerializeField] private float firstLevelTopY = 300.0f;
+    [SerializeField] private float levelHeight = 300.0f;
+
+    [Range(0.0f, 1.0f)]
+    [SerializeField] private float unloadPreviousProgress = 0.5f;
+
+    [SerializeField] private string levelRootName = "LevelRoot";
+
+    private int requestedLevelIndex;
+    private int appliedLevelIndex = -1;
+
+    private bool requestedKeepPrevious;
+    private bool appliedKeepPrevious;
+
+    private bool isRefreshing;
+
+    private void Start()
     {
         if (player == null)
         {
-            Debug.LogError(
-                "TestLevelStreamer : Player Ç™ê›íËÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒÅB"
-            );
-
-            yield break;
+            Debug.LogError("Player is not assigned.");
+            enabled = false;
+            return;
         }
 
-        // Player ë™ééäJénçÇìx
-        Vector3 playerPosition = player.position;
-        playerPosition.y = 300.0f;
-        player.position = playerPosition;
+        if (levelScenes == null || levelScenes.Length == 0)
+        {
+            Debug.LogError("Level scenes are not assigned.");
+            enabled = false;
+            return;
+        }
 
+        requestedLevelIndex = GetLevelIndex(player.position.y);
+        requestedKeepPrevious = ShouldKeepPrevious(requestedLevelIndex);
 
-        // Level5 ç⁄ì¸
-        yield return LoadLevel(
-            level5Scene,
-            level5CenterY
-        );
-
-
-        // Level4 íÜêSà íu
-        //
-        // Level5 Bottom = 200 - 150 = 50
-        //
-        // Level4 Top ïKê{ = 50
-        //
-        // Level4 Center = 50 - 150 = -100
-        float level4CenterY =
-            level5CenterY -
-            (halfLevelHeight * 2.0f);
-
-
-        // ç›äﬂâ∆êiì¸ Level4 ëOèAóaêÊç⁄ì¸
-        yield return LoadLevel(
-            level4Scene,
-            level4CenterY
-        );
-
-
-        Debug.Log(
-            $"Scene Streaming Ready. Seam Y = {SeamWorldY}"
-        );
+        StartCoroutine(RefreshLoop());
     }
-
 
     private void Update()
     {
-        if (player == null)
+        if (player == null) return;
+
+        int levelIndex = GetLevelIndex(player.position.y);
+        bool keepPrevious = ShouldKeepPrevious(levelIndex);
+
+        if (levelIndex == requestedLevelIndex &&
+            keepPrevious == requestedKeepPrevious)
             return;
 
+        requestedLevelIndex = levelIndex;
+        requestedKeepPrevious = keepPrevious;
 
-        // äﬂâ∆õﬂ„Sún Level5 êiì¸ Level4
-        if (!enteredLevel4 &&
-            player.position.y <= SeamWorldY)
-        {
-            enteredLevel4 = true;
-
-            Debug.Log(
-                "Level5 -> Level4"
-            );
-
-            StartCoroutine(
-                UnloadLevel5WhenSafe()
-            );
-        }
+        if (!isRefreshing)
+            StartCoroutine(RefreshLoop());
     }
 
-
-    private IEnumerator LoadLevel(
-        string sceneName,
-        float centerY
-    )
+    private IEnumerator RefreshLoop()
     {
-        Scene scene =
-            SceneManager.GetSceneByName(sceneName);
+        isRefreshing = true;
 
-
-        // ä“üìóL Load
-        if (!scene.isLoaded)
+        while (appliedLevelIndex != requestedLevelIndex ||
+               appliedKeepPrevious != requestedKeepPrevious)
         {
-            Debug.Log(
-                $"Load Scene : {sceneName}"
-            );
+            int targetIndex = requestedLevelIndex;
+            bool keepPrevious = requestedKeepPrevious;
+
+            yield return RefreshStreamingWindow(targetIndex, keepPrevious);
+
+            appliedLevelIndex = targetIndex;
+            appliedKeepPrevious = keepPrevious;
+        }
+
+        isRefreshing = false;
+    }
+
+    private IEnumerator RefreshStreamingWindow(
+        int currentLevelIndex,
+        bool keepPrevious)
+    {
+        HashSet<int> requiredLevels = new HashSet<int>();
+
+        requiredLevels.Add(currentLevelIndex);
+
+        int nextIndex = currentLevelIndex + 1;
+        if (nextIndex < levelScenes.Length)
+            requiredLevels.Add(nextIndex);
+
+        int previousIndex = currentLevelIndex - 1;
+
+        if (keepPrevious && previousIndex >= 0)
+            requiredLevels.Add(previousIndex);
+
+        foreach (int index in requiredLevels)
+        {
+            string sceneName = levelScenes[index].sceneName;
+
+            if (string.IsNullOrEmpty(sceneName))
+                continue;
+
+            if (IsSceneLoaded(sceneName))
+            {
+                PositionLevelScene(index);
+                continue;
+            }
+
+            if (!Application.CanStreamedLevelBeLoaded(sceneName))
+            {
+                Debug.LogError(
+                    $"Scene '{sceneName}' is not in the Build Profile."
+                );
+                continue;
+            }
+
+            Debug.Log($"Load Scene : {sceneName}");
 
             AsyncOperation operation =
                 SceneManager.LoadSceneAsync(
@@ -130,79 +144,112 @@ public class TestLevelStreamer : MonoBehaviour
                     LoadSceneMode.Additive
                 );
 
-            while (!operation.isDone)
-            {
-                yield return null;
-            }
-        }
-
-
-        // ç⁄ì¸äÆê¨å„éÊìæ Scene
-        scene =
-            SceneManager.GetSceneByName(sceneName);
-
-
-        GameObject[] roots =
-            scene.GetRootGameObjects();
-
-
-        foreach (GameObject root in roots)
-        {
-            if (root.name != "LevelRoot")
+            if (operation == null)
                 continue;
 
+            yield return operation;
+
+            PositionLevelScene(index);
+        }
+
+        for (int i = 0; i < levelScenes.Length; i++)
+        {
+            if (requiredLevels.Contains(i))
+                continue;
+
+            string sceneName = levelScenes[i].sceneName;
+
+            if (string.IsNullOrEmpty(sceneName))
+                continue;
+
+            if (!IsSceneLoaded(sceneName))
+                continue;
+
+            Debug.Log($"Unload Scene : {sceneName}");
+
+            AsyncOperation operation =
+                SceneManager.UnloadSceneAsync(sceneName);
+
+            if (operation != null)
+                yield return operation;
+        }
+    }
+
+    private int GetLevelIndex(float playerY)
+    {
+        float fallDistance = firstLevelTopY - playerY;
+        int index = Mathf.FloorToInt(fallDistance / levelHeight);
+
+        return Mathf.Clamp(
+            index,
+            0,
+            levelScenes.Length - 1
+        );
+    }
+
+    private float GetLevelProgress(int index)
+    {
+        float topY =
+            firstLevelTopY -
+            (levelHeight * index);
+
+        float progress =
+            (topY - player.position.y) /
+            levelHeight;
+
+        return Mathf.Clamp01(progress);
+    }
+
+    private bool ShouldKeepPrevious(int index)
+    {
+        if (index <= 0)
+            return false;
+
+        return GetLevelProgress(index) <
+               unloadPreviousProgress;
+    }
+
+    private float GetLevelCenterY(int index)
+    {
+        return firstLevelTopY -
+               (levelHeight * 0.5f) -
+               (levelHeight * index);
+    }
+
+    private void PositionLevelScene(int index)
+    {
+        string sceneName =
+            levelScenes[index].sceneName;
+
+        Scene scene =
+            SceneManager.GetSceneByName(sceneName);
+
+        if (!scene.IsValid() || !scene.isLoaded)
+            return;
+
+        foreach (GameObject root in scene.GetRootGameObjects())
+        {
+            if (root.name != levelRootName)
+                continue;
 
             Vector3 position =
                 root.transform.position;
 
-            position.y = centerY;
+            position.y =
+                GetLevelCenterY(index);
 
             root.transform.position =
                 position;
 
-
-            Debug.Log(
-                $"{sceneName} Center Y = {centerY}"
-            );
-
-            yield break;
+            return;
         }
-
-
-        Debug.LogWarning(
-            $"{sceneName} Ç… LevelRoot Ç™Ç†ÇËÇ‹ÇπÇÒÅB"
-        );
     }
 
-
-    private IEnumerator UnloadLevel5WhenSafe()
+    private bool IsSceneLoaded(string sceneName)
     {
-        // çÑå◊âﬂåäEÍyéûïsóvóßçèôàèúÅC
-        // çƒâ∫ç~àÍÍyçÀâµç⁄ Level5
-        float unloadY =
-            SeamWorldY - unloadMargin;
-
-
-        while (player.position.y > unloadY)
-        {
-            yield return null;
-        }
-
-
         Scene scene =
-            SceneManager.GetSceneByName(level5Scene);
+            SceneManager.GetSceneByName(sceneName);
 
-
-        if (scene.isLoaded)
-        {
-            Debug.Log(
-                $"Unload Scene : {level5Scene}"
-            );
-
-            yield return
-                SceneManager.UnloadSceneAsync(
-                    level5Scene
-                );
-        }
+        return scene.IsValid() && scene.isLoaded;
     }
 }
