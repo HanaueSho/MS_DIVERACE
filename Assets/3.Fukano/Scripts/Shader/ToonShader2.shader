@@ -28,7 +28,7 @@ Shader "Custom/ToonShader_2"
 
             #pragma vertex vert
             #pragma fragment frag
-            #pragma multi_compile_fragment _ _CLUSTER_LIGHT_LOOP
+            #pragma multi_compile _ _CLUSTER_LIGHT_LOOP
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
@@ -110,15 +110,15 @@ Shader "Custom/ToonShader_2"
                 //==================================================
                 Light mainLight = GetMainLight();
 
-                float3 mainLightDir = normalize(mainLight.direction);
-                float mainNdotL = saturate(dot(normalWS, mainLightDir));
-
-                //lighting += mainNdotL * mainLight.distanceAttenuation * mainLight.shadowAttenuation;
+                float3 mainLightDir = normalize(mainLight.direction);       // メインライトの方向を正規化
+                float mainNdotL = saturate(dot(normalWS, mainLightDir));    // 法線とライトの方向の内積を計算して、0～1に収める
+                float3 mainLightColor = mainLight.color.rgb;                // メインライトの色を取得
+                float lightLuminance = dot(mainLight.color.rgb, float3(0.2126, 0.7152, 0.0722));    // メインライトの輝度を計算
+                float mainLighting = mainNdotL * mainLight.distanceAttenuation * mainLight.shadowAttenuation * lightLuminance;
 
                 //最大値で比較して、メインライトの光量を優先する
                 if(1)
                 {
-                    float mainLighting = mainNdotL * mainLight.distanceAttenuation * mainLight.shadowAttenuation;
                     lighting = max(lighting, mainLighting);
                 }
                 
@@ -131,25 +131,32 @@ Shader "Custom/ToonShader_2"
                inputData.normalWS = normalWS;
                inputData.viewDirectionWS = GetWorldSpaceNormalizeViewDir(IN.positionWS);
                inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(IN.positionHCS);
+               float3 strongestLightColor = mainLight.color.rgb;    // 最も強い光の色をmainLightで初期化
+               float strongestLighting = mainLighting;              // 最も強い光の光量をmainLightで初期化
                
                uint pixelLightCount = GetAdditionalLightsCount();
                
                LIGHT_LOOP_BEGIN(pixelLightCount)
                
-                   Light light = GetAdditionalLight(lightIndex, IN.positionWS);
+                   Light light = GetAdditionalLight(lightIndex, IN.positionWS); // 追加ライトの情報を取得               
+                   float3 lightDir = normalize(light.direction);    // 追加ライトの方向を正規化               
+                   float NdotL = saturate(dot(normalWS, lightDir)); // 法線とライトの方向の内積を計算して、0～1に収める               
+                   float3 additionalLightColor = light.color.rgb;   // 追加ライトの色を取得
+                   float additionalLuminance = dot(additionalLightColor, float3(0.2126, 0.7152, 0.0722));   // 追加ライトの輝度を計算
+
+                   // 追加ライトの光量を計算
+                   float additionalLighting = NdotL * light.distanceAttenuation * light.shadowAttenuation * additionalLuminance;
                
-                   float3 lightDir = normalize(light.direction);
-               
-                   float NdotL = saturate(dot(normalWS, lightDir));
-               
-                   float additionalLighting =
-                       NdotL *
-                       light.distanceAttenuation *
-                       light.shadowAttenuation;
-               
-                   lighting = max(lighting, additionalLighting);
-               
+                   // 追加ライトの光量が最も強い光の光量より大きい場合、最も強い光の色と光量を更新
+                   if(additionalLighting > strongestLighting)
+                   {
+                       strongestLighting = additionalLighting;
+                       strongestLightColor = additionalLightColor;
+                   }
+
                LIGHT_LOOP_END
+
+                   lighting = saturate(strongestLighting);
 
 
                //==================================================
@@ -160,9 +167,9 @@ Shader "Custom/ToonShader_2"
                //==================================================
                // 3段階の色
                //==================================================
-               half3 shadowColor = baseColor.rgb * _ShadowColor.rgb;
-               half3 midColor    = baseColor.rgb * _MidColor.rgb;
-               half3 lightColor  = baseColor.rgb * _LightColor.rgb;
+               half3 shadowColor = baseColor.rgb * _ShadowColor.rgb * strongestLightColor;
+               half3 midColor    = baseColor.rgb * _MidColor.rgb    * strongestLightColor;
+               half3 lightColor  = baseColor.rgb * _LightColor.rgb  * strongestLightColor;
 
                //==================================================
                // 最終的な光量を3段階に分ける
