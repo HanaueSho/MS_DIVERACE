@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -23,21 +22,11 @@ public class TestLevelStreamer : MonoBehaviour
         new LevelScene { sceneName = "Test_Scene_Level_01" }
     };
 
-    [SerializeField] private float firstLevelTopY = 300.0f;
-    [SerializeField] private float levelHeight = 300.0f;
-
     [Range(0.0f, 1.0f)]
     [SerializeField] private float unloadPreviousProgress = 0.5f;
 
-    [SerializeField] private string levelRootName = "LevelRoot";
-
-    private int requestedLevelIndex;
-    private int appliedLevelIndex = -1;
-
-    private bool requestedKeepPrevious;
-    private bool appliedKeepPrevious;
-
-    private bool isRefreshing;
+    private int currentLevelIndex;
+    private bool isStreaming;
 
     private void Start()
     {
@@ -48,95 +37,134 @@ public class TestLevelStreamer : MonoBehaviour
             return;
         }
 
-        if (levelScenes == null || levelScenes.Length == 0)
+        StartCoroutine(InitializeLevels());
+    }
+
+    private IEnumerator InitializeLevels()
+    {
+        isStreaming = true;
+
+        yield return LoadAndPlaceLevel(
+            0,
+            Vector3.zero
+        );
+
+        if (levelScenes.Length > 1)
         {
-            Debug.LogError("Level scenes are not assigned.");
-            enabled = false;
-            return;
+            LevelSceneInfo currentInfo = GetLevelInfo(0);
+
+            if (currentInfo != null)
+            {
+                yield return LoadAndPlaceLevel(
+                    1,
+                    currentInfo.BottomPoint.position
+                );
+            }
         }
 
-        requestedLevelIndex = GetLevelIndex(player.position.y);
-        requestedKeepPrevious = ShouldKeepPrevious(requestedLevelIndex);
-
-        StartCoroutine(RefreshLoop());
+        isStreaming = false;
     }
 
     private void Update()
     {
-        if (player == null) return;
-
-        int levelIndex = GetLevelIndex(player.position.y);
-        bool keepPrevious = ShouldKeepPrevious(levelIndex);
-
-        if (levelIndex == requestedLevelIndex &&
-            keepPrevious == requestedKeepPrevious)
+        if (isStreaming)
             return;
 
-        requestedLevelIndex = levelIndex;
-        requestedKeepPrevious = keepPrevious;
+        LevelSceneInfo currentInfo =
+            GetLevelInfo(currentLevelIndex);
 
-        if (!isRefreshing)
-            StartCoroutine(RefreshLoop());
-    }
+        if (currentInfo == null)
+            return;
 
-    private IEnumerator RefreshLoop()
-    {
-        isRefreshing = true;
+        float progress =
+            GetLevelProgress(currentInfo);
 
-        while (appliedLevelIndex != requestedLevelIndex ||
-               appliedKeepPrevious != requestedKeepPrevious)
+        if (progress >= unloadPreviousProgress)
         {
-            int targetIndex = requestedLevelIndex;
-            bool keepPrevious = requestedKeepPrevious;
+            int previousIndex =
+                currentLevelIndex - 1;
 
-            yield return RefreshStreamingWindow(targetIndex, keepPrevious);
-
-            appliedLevelIndex = targetIndex;
-            appliedKeepPrevious = keepPrevious;
+            if (previousIndex >= 0 &&
+                IsSceneLoaded(previousIndex))
+            {
+                StartCoroutine(
+                    UnloadLevel(previousIndex)
+                );
+            }
         }
 
-        isRefreshing = false;
+        if (player.position.y <=
+            currentInfo.BottomPoint.position.y)
+        {
+            if (currentLevelIndex <
+                levelScenes.Length - 1)
+            {
+                StartCoroutine(
+                    MoveToNextLevel()
+                );
+            }
+        }
     }
 
-    private IEnumerator RefreshStreamingWindow(
-        int currentLevelIndex,
-        bool keepPrevious)
+    private IEnumerator MoveToNextLevel()
     {
-        HashSet<int> requiredLevels = new HashSet<int>();
+        isStreaming = true;
 
-        requiredLevels.Add(currentLevelIndex);
+        currentLevelIndex++;
 
-        int nextIndex = currentLevelIndex + 1;
+        int nextIndex =
+            currentLevelIndex + 1;
+
         if (nextIndex < levelScenes.Length)
-            requiredLevels.Add(nextIndex);
-
-        int previousIndex = currentLevelIndex - 1;
-
-        if (keepPrevious && previousIndex >= 0)
-            requiredLevels.Add(previousIndex);
-
-        foreach (int index in requiredLevels)
         {
-            string sceneName = levelScenes[index].sceneName;
+            LevelSceneInfo currentInfo =
+                GetLevelInfo(currentLevelIndex);
 
-            if (string.IsNullOrEmpty(sceneName))
-                continue;
-
-            if (IsSceneLoaded(sceneName))
+            if (currentInfo != null)
             {
-                PositionLevelScene(index);
-                continue;
-            }
-
-            if (!Application.CanStreamedLevelBeLoaded(sceneName))
-            {
-                Debug.LogError(
-                    $"Scene '{sceneName}' is not in the Build Profile."
+                yield return LoadAndPlaceLevel(
+                    nextIndex,
+                    currentInfo.BottomPoint.position
                 );
-                continue;
             }
+        }
 
-            Debug.Log($"Load Scene : {sceneName}");
+        yield return UnloadLevelsOutsideWindow();
+
+        Debug.Log(
+            $"Current Level Index : {currentLevelIndex}"
+        );
+
+        isStreaming = false;
+    }
+
+    private IEnumerator LoadAndPlaceLevel(
+        int index,
+        Vector3 targetTopPosition
+    )
+    {
+        if (index < 0 ||
+            index >= levelScenes.Length)
+            yield break;
+
+        string sceneName =
+            levelScenes[index].sceneName;
+
+        if (!Application.CanStreamedLevelBeLoaded(
+                sceneName))
+        {
+            Debug.LogError(
+                $"Scene '{sceneName}' is not in the Build Profile."
+            );
+
+            yield break;
+        }
+
+        if (!IsSceneLoaded(index))
+        {
+            Debug.Log(
+                $"Load Scene : {sceneName}"
+            );
 
             AsyncOperation operation =
                 SceneManager.LoadSceneAsync(
@@ -145,111 +173,127 @@ public class TestLevelStreamer : MonoBehaviour
                 );
 
             if (operation == null)
-                continue;
+                yield break;
 
             yield return operation;
-
-            PositionLevelScene(index);
         }
 
-        for (int i = 0; i < levelScenes.Length; i++)
+        LevelSceneInfo info =
+            GetLevelInfo(index);
+
+        if (info == null)
         {
-            if (requiredLevels.Contains(i))
-                continue;
+            Debug.LogError(
+                $"LevelSceneInfo not found : {sceneName}"
+            );
 
-            string sceneName = levelScenes[i].sceneName;
-
-            if (string.IsNullOrEmpty(sceneName))
-                continue;
-
-            if (!IsSceneLoaded(sceneName))
-                continue;
-
-            Debug.Log($"Unload Scene : {sceneName}");
-
-            AsyncOperation operation =
-                SceneManager.UnloadSceneAsync(sceneName);
-
-            if (operation != null)
-                yield return operation;
+            yield break;
         }
-    }
 
-    private int GetLevelIndex(float playerY)
-    {
-        float fallDistance = firstLevelTopY - playerY;
-        int index = Mathf.FloorToInt(fallDistance / levelHeight);
+        Vector3 offset =
+            targetTopPosition -
+            info.TopPoint.position;
 
-        return Mathf.Clamp(
-            index,
-            0,
-            levelScenes.Length - 1
+        info.transform.position += offset;
+
+        Debug.Log(
+            $"{sceneName} Top Y = {info.TopPoint.position.y}, " +
+            $"Bottom Y = {info.BottomPoint.position.y}"
         );
     }
 
-    private float GetLevelProgress(int index)
+    private float GetLevelProgress(
+        LevelSceneInfo info
+    )
     {
         float topY =
-            firstLevelTopY -
-            (levelHeight * index);
+            info.TopPoint.position.y;
 
-        float progress =
-            (topY - player.position.y) /
-            levelHeight;
+        float bottomY =
+            info.BottomPoint.position.y;
 
-        return Mathf.Clamp01(progress);
+        return Mathf.InverseLerp(
+            topY,
+            bottomY,
+            player.position.y
+        );
     }
 
-    private bool ShouldKeepPrevious(int index)
+    private LevelSceneInfo GetLevelInfo(
+        int index
+    )
     {
-        if (index <= 0)
+        if (!IsSceneLoaded(index))
+            return null;
+
+        Scene scene =
+            SceneManager.GetSceneByName(
+                levelScenes[index].sceneName
+            );
+
+        foreach (GameObject root in
+                 scene.GetRootGameObjects())
+        {
+            LevelSceneInfo info =
+                root.GetComponentInChildren<LevelSceneInfo>(
+                    true
+                );
+
+            if (info != null)
+                return info;
+        }
+
+        return null;
+    }
+
+    private bool IsSceneLoaded(int index)
+    {
+        if (index < 0 ||
+            index >= levelScenes.Length)
             return false;
 
-        return GetLevelProgress(index) <
-               unloadPreviousProgress;
+        Scene scene =
+            SceneManager.GetSceneByName(
+                levelScenes[index].sceneName
+            );
+
+        return scene.IsValid() &&
+               scene.isLoaded;
     }
 
-    private float GetLevelCenterY(int index)
+    private IEnumerator UnloadLevel(int index)
     {
-        return firstLevelTopY -
-               (levelHeight * 0.5f) -
-               (levelHeight * index);
-    }
+        if (!IsSceneLoaded(index))
+            yield break;
 
-    private void PositionLevelScene(int index)
-    {
         string sceneName =
             levelScenes[index].sceneName;
 
-        Scene scene =
-            SceneManager.GetSceneByName(sceneName);
+        Debug.Log(
+            $"Unload Scene : {sceneName}"
+        );
 
-        if (!scene.IsValid() || !scene.isLoaded)
-            return;
+        AsyncOperation operation =
+            SceneManager.UnloadSceneAsync(
+                sceneName
+            );
 
-        foreach (GameObject root in scene.GetRootGameObjects())
-        {
-            if (root.name != levelRootName)
-                continue;
-
-            Vector3 position =
-                root.transform.position;
-
-            position.y =
-                GetLevelCenterY(index);
-
-            root.transform.position =
-                position;
-
-            return;
-        }
+        if (operation != null)
+            yield return operation;
     }
 
-    private bool IsSceneLoaded(string sceneName)
+    private IEnumerator UnloadLevelsOutsideWindow()
     {
-        Scene scene =
-            SceneManager.GetSceneByName(sceneName);
+        for (int i = 0;
+             i < levelScenes.Length;
+             i++)
+        {
+            if (i >= currentLevelIndex - 1 &&
+                i <= currentLevelIndex + 1)
+                continue;
 
-        return scene.IsValid() && scene.isLoaded;
+            if (IsSceneLoaded(i))
+                yield return UnloadLevel(i);
+        }
     }
 }

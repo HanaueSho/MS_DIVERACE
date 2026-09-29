@@ -2,15 +2,9 @@ using UnityEngine;
 
 public class LevelSceneInfo : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    [SerializeField] private Transform topPoint;
+    [SerializeField] private Transform bottomPoint;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public Transform TopPoint => topPoint;
+    public Transform BottomPoint => bottomPoint;
 }

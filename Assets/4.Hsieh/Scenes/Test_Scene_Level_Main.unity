@@ -419,10 +419,8 @@ MonoBehaviour:
   levelScenes:
   - sceneName: Test_Scene_Level_05
   - sceneName: Test_Scene_Level_04
-  firstLevelTopY: 300
-  levelHeight: 300
+  - sceneName: Test_Scene_Level_03
   unloadPreviousProgress: 0.7
-  levelRootName: LevelRoot
 --- !u!4 &1812089756
 Transform:
   m_ObjectHideFlags: 0
