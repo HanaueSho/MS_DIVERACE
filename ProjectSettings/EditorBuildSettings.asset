@@ -20,6 +20,15 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/0.Scenes/Scene_Result.unity
     guid: 750a27e3b7e5b7a41ac190a06dc621e3
+  - enabled: 1
+    path: Assets/2.Ooka/Scenes/Scene_Level_Test5.unity
+    guid: 823eea2257989f647a8ae271130fae7f
+  - enabled: 1
+    path: Assets/2.Ooka/Scenes/Scene_Level_Test4.unity
+    guid: f81eb913361664749af6cdec2c35f14b
+  - enabled: 1
+    path: Assets/2.Ooka/Scenes/Scene_Level_TestMain.unity
+    guid: be46d31704378de4f8ee055b3c98f584
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
