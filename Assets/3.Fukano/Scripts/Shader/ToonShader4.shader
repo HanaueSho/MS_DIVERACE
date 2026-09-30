@@ -1,4 +1,4 @@
-Shader "Custom/ToonShader_3"
+Shader "Custom/ToonShader_4"
 {
     //Insoectorから設定できるパラメータを定義する
     Properties
@@ -21,6 +21,8 @@ Shader "Custom/ToonShader_3"
         _LightColorStrength("Light Color Influence (0.0 - 2.0)", Range(0, 2)) = 1.0
         _LuminanceStrength("Luminance Influence (0.0 - 2.0)", Range(0, 2)) = 1.0
 
+        _OutlineColor("Outline Color", Color) = (0, 0, 0, 1)
+        _OutlineWidth("Outline Width", Range(0, 0.2)) = 0.05
     }
 
     //描画条件・描画方法(1つのShaderに複数のSubShaderを含めることも可能)
@@ -62,7 +64,7 @@ Shader "Custom/ToonShader_3"
             TEXTURE2D(_BaseMap);
             SAMPLER(sampler_BaseMap);
 
-            // GPU側への定数バッファ
+                        // GPU側への定数バッファ
             CBUFFER_START(UnityPerMaterial)
                 half4 _BaseColor;
                 half4 _ShadowColor;
@@ -80,6 +82,9 @@ Shader "Custom/ToonShader_3"
                 float _LightStrength;
                 float _LightColorStrength;
                 float _LuminanceStrength;
+
+                float4 _OutlineColor;
+                float _OutlineWidth;
 
             CBUFFER_END
 
@@ -208,38 +213,69 @@ Shader "Custom/ToonShader_3"
 
             ENDHLSL
         }
+
+        // ==================================================
+        // アウトライン描画
+        // ==================================================
+        Pass
+        {
+            Name "Outline"
+            Tags { "LightMode" = "UniversalForward" }
+        
+    Cull Front
+    ZWrite On
+    ZTest LEqual
+            HLSLPROGRAM
+            #pragma vertex vertOutline
+            #pragma fragment fragOutline
+        
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+        
+            CBUFFER_START(UnityPerMaterial)
+                float4 _OutlineColor;
+                float _OutlineWidth;
+
+            CBUFFER_END
+
+            struct Attributes
+            {
+                float4 positionOS : POSITION;
+                float3 normalOS : NORMAL;
+            };
+        
+            struct Varyings
+            {
+                float4 positionHCS : SV_POSITION;
+            };
+        
+            Varyings vertOutline(Attributes IN)
+            {
+                Varyings OUT;
+
+                float3 normalWS = TransformObjectToWorldNormal(IN.normalOS);
+                float3 posWS = TransformObjectToWorld(IN.positionOS.xyz);
+
+                // スケール補正
+                float3 scale = float3(
+                                     length(unity_ObjectToWorld._m00_m10_m20),
+                                     length(unity_ObjectToWorld._m01_m11_m21),
+                                     length(unity_ObjectToWorld._m02_m12_m22)
+                                     );
+                float maxScale = max(max(scale.x, scale.y), scale.z);
+
+                posWS += normalWS * (_OutlineWidth * maxScale);
+                OUT.positionHCS = TransformWorldToHClip(posWS);
+                return OUT;
+            }
+        
+            half4 fragOutline(Varyings IN) : SV_Target
+            {
+                return _OutlineColor;
+            }
+        
+            ENDHLSL
+        }
+
     }
 }
 
-
-/*
-
-               Main Light
-                    │
-                    ▼
-              mainLighting
-                    │
-                    ▼
-                lighting
-                    │
-                    │ max()
-                    │
-       ┌────────────┴────────────┐
-       │                         │
- Point Light 1              Point Light 2
-       │                         │
-       ▼                         ▼
-additionalLighting         additionalLighting
-       │                         │
-       └────────── max() ────────┘
-                    │
-                    ▼
-              lighting = 0～1
-                    │
-          ┌─────────┼─────────┐
-          ▼         ▼         ▼
-       Shadow      Mid       Light]
-
-
-
-*/
