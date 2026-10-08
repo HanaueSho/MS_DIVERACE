@@ -27,6 +27,7 @@ public class PlayerState_FreeFall : PlayerState_Base
         // 移動
         _controller.Movement.Move(moveInput, postureInput, Time.deltaTime);
         _controller.Movement.RotateYaw(rotateInput, Time.deltaTime);
+        _controller.Animation.RotateTo(postureInput);
     }
     public override void Exit() { }
 }
