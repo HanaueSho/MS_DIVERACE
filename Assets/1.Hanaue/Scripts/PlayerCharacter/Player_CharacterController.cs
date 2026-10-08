@@ -22,17 +22,20 @@ public class Player_CharacterController : MonoBehaviour
     [SerializeField] private Player_InputHandler _input;
     [SerializeField] private Player_Movement _movement;
     [SerializeField] private Player_StateMachine _stateMachine;
+    [SerializeField] private Player_CollisionDetector _collisionDetector;
 
     // --------------------------------------------------
     // ----- Public Property -----
     // --------------------------------------------------
     public Player_InputHandler InputHandler => _input;
     public Player_Movement Movement => _movement;
+    public Player_CollisionDetector CollisionDetector => _collisionDetector;
 
     // --------------------------------------------------
     // ----- ControllerMode -----
     // --------------------------------------------------
-    public ControllerMode CurrentControllerMode { get; private set; } = ControllerMode.Manual;
+    [SerializeField] private ControllerMode _currentControllerMode = ControllerMode.Manual;
+    public ControllerMode CurrentControllerMode => _currentControllerMode;
 
 
     // --------------------------------------------------
@@ -43,6 +46,7 @@ public class Player_CharacterController : MonoBehaviour
         _input = GetComponent<Player_InputHandler>();
         _movement = GetComponent<Player_Movement>();
         _stateMachine = GetComponent<Player_StateMachine>();
+        _collisionDetector = GetComponent<Player_CollisionDetector>();
     }
     void Update()
     {

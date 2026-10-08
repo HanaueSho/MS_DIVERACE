@@ -13,7 +13,6 @@ public class PlayerState_FreeFall : PlayerState_Base
     {
     }
 
-
     // --------------------------------------------------
     // ----- Lifecycle -----
     // --------------------------------------------------
@@ -22,9 +21,12 @@ public class PlayerState_FreeFall : PlayerState_Base
     {
         // 入力を取得
         Vector2 moveInput = _controller.InputHandler.MoveInput;
+        float postureInput = _controller.InputHandler.PoseInput;
+        float rotateInput = _controller.InputHandler.RotateInput;
 
         // 移動
-        _controller.Movement.Move(moveInput, Time.deltaTime);
+        _controller.Movement.Move(moveInput, postureInput, Time.deltaTime);
+        _controller.Movement.RotateYaw(rotateInput, Time.deltaTime);
     }
     public override void Exit() { }
 }
