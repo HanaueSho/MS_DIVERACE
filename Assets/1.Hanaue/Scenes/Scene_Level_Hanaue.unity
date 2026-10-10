@@ -193,14 +193,15 @@ GameObject:
   m_Component:
   - component: {fileID: 667250416}
   - component: {fileID: 667250415}
-  - component: {fileID: 667250414}
   - component: {fileID: 667250413}
   - component: {fileID: 667250412}
+  - component: {fileID: 667250418}
+  - component: {fileID: 667250414}
   - component: {fileID: 667250417}
   - component: {fileID: 667250411}
   m_Layer: 0
   m_Name: PlayerCharacter_Root
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -327,6 +328,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7715e52418cd4048a44319cdfc1f598, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player_StateMachine
+  _freeFallControlData: {fileID: 11400000, guid: 4dfbccdf6d1ae2a45bdff909e321871b, type: 2}
+  _damageControlData: {fileID: 11400000, guid: 4dfbccdf6d1ae2a45bdff909e321871b, type: 2}
 --- !u!114 &667250413
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -339,16 +342,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: daba43c3e7d8a994fafa1562b770ace4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player_Movement
-  _gravityAcceleration: 30
-  _horizontalTerminalFallSpeed: 60
-  _verticalTerminalFallSpeed: 100
-  _forwardAcceleration: 40
-  _sideAcceleration: 30
-  _backAcceleration: 20
-  _horizontalPostureControl: 1
-  _verticalPostureControl: 0.4
-  _horizontalDrag: 2
-  _yawSpeed: 180
+  _parameterData: {fileID: 11400000, guid: 8c40defb6755f5f4ca63b91edfd4cbef, type: 2}
 --- !u!114 &667250414
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -378,7 +372,7 @@ MonoBehaviour:
   _stateMachine: {fileID: 0}
   _collisionDetector: {fileID: 0}
   _animation: {fileID: 0}
-  _currentControllerMode: 1
+  _currentControllerMode: 0
 --- !u!4 &667250416
 Transform:
   m_ObjectHideFlags: 0
@@ -409,6 +403,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player_Animation
   _body: {fileID: 254205089}
+--- !u!114 &667250418
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 667250410}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b5fb9bc27c906a468b6eeacff0f513c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Player_CollisionDetector
+  _boxCollider: {fileID: 1819153685}
+  _skinWidth: 0.02
+  _topNormalThreshold: 0.6
 --- !u!1 &687997862
 GameObject:
   m_ObjectHideFlags: 0

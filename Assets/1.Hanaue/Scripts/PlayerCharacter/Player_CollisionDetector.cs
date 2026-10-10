@@ -18,6 +18,8 @@ public struct PlayerImpactInfo
     public Vector3 Normal;
 
     public Collider Collider;
+
+    public float Distance;
 }
 
 public class Player_CollisionDetector : MonoBehaviour
@@ -124,7 +126,9 @@ public class Player_CollisionDetector : MonoBehaviour
             Point = targetHit.point,
             Normal = targetHit.normal,
 
-            Collider = targetHit.collider
+            Collider = targetHit.collider,
+
+            Distance = targetHit.distance,
         };
 
         return true;

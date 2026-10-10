@@ -1,6 +1,7 @@
 ﻿/*
     Player_Movement
     20261004  hanaue sho
+    UpdateVelocity => CheckCollision => ApplyVelocity
  */
 using UnityEngine;
 
@@ -12,37 +13,10 @@ public class Player_Movement : MonoBehaviour
     private Player_CharacterController _characterController;
 
     // --------------------------------------------------
-    // ----- Fall Parameter -----
+    // ----- Parameter -----
     // --------------------------------------------------
-    [Header("Fall Parameter")]
-    [SerializeField] private float _gravityAcceleration = 30.0f;
-    // 姿勢ごとの自然な終端落下速度
-    [SerializeField] private float _horizontalTerminalFallSpeed = 20.0f;
-    [SerializeField] private float _verticalTerminalFallSpeed = 50.0f;
-
-    // --------------------------------------------------
-    // ----- HorizontalMove Parameter -----
-    // --------------------------------------------------
-    [Header("HorizontalMove Parameter")]
-    [SerializeField] private float _forwardAcceleration = 20.0f;
-    [SerializeField] private float _sideAcceleration = 15.0f;
-    [SerializeField] private float _backAcceleration = 10.0f;
-
-    // --------------------------------------------------
-    // ----- HorizontalControl Parameter -----
-    // --------------------------------------------------
-    [Header("HorizontalControl Parameter")]
-    // 姿勢に寄る水平走査性能
-    [SerializeField] private float _horizontalPostureControl = 1.0f;
-    [SerializeField] private float _verticalPostureControl = 0.4f;
-    // 水平方向の抵抗
-    [SerializeField] private float _horizontalDrag = 2.0f;
-
-    // --------------------------------------------------
-    // ----- Rotation Parameter -----
-    // --------------------------------------------------
-    [Header("Rotation Parameter")]
-    [SerializeField] private float _yawSpeed = 180.0f;
+    [Header("Movement Parameter")]
+    [SerializeField] private PlayerMovement_ParameterData _parameterData;
 
     // --------------------------------------------------
     // ----- Runtime Parameter -----
@@ -59,39 +33,61 @@ public class Player_Movement : MonoBehaviour
     }
 
     // --------------------------------------------------
-    // ----- Move -----
+    // ----- UpdateVelocity -----
     // --------------------------------------------------
-    public void Move(Vector2 input,float posture, float deltaTime)
+    public void UpdateVelocity(Vector2 input,float posture, PlayerMovement_ControlData controlData, float deltaTime)
     {
         posture = Mathf.Clamp01(posture);
-
         // 入力値の大きさを１以下にする
         input = Vector2.ClampMagnitude(input, 1.0f);
 
         // 1. 水平方向の加速度
-        Vector3 horizontalAcceleration = CalculateHorizontalAcceleration(input, posture);
+        if (controlData.EnableHorizontalMove)
+        {
+            Vector3 horizontalAcceleration = CalculateHorizontalAcceleration(input, posture, controlData);
+
+            _currentVelocity += horizontalAcceleration * deltaTime;
+        }
 
         // 2. 水平方向の抵抗
         Vector3 horizontalDragAcceleration = CalculateHorizontalDrag();
+        _currentVelocity += horizontalDragAcceleration * deltaTime;
 
         // 3. 落下方向の加速度
-        float verticalAcceleration = CalculateVerticalAcceleration(posture);
+        if (controlData.EnableFall)
+        {
+            float verticalAcceleration = CalculateVerticalAcceleration(posture, controlData);
+            _currentVelocity.y += verticalAcceleration * deltaTime;
+        }
+    }
 
-        // 4. 速度更新
-        _currentVelocity += horizontalAcceleration * deltaTime;
-        _currentVelocity += horizontalDragAcceleration * deltaTime;
-        _currentVelocity.y += verticalAcceleration * deltaTime;
+    // --------------------------------------------------
+    // ----- Get Displacement -----
+    // --------------------------------------------------
+    public Vector3 GetDisplacement(float deltaTime)
+    {
+        return _currentVelocity * deltaTime;
+    }
 
-        // 5. 位置更新
-        transform.position += _currentVelocity * deltaTime;
+    // --------------------------------------------------
+    // ----- Aplly Movement -----
+    // --------------------------------------------------
+    public void ApplyMovement(Vector3 displacement)
+    {
+        transform.position += displacement;
     }
 
     // --------------------------------------------------
     // ----- RotateYaw -----
     // --------------------------------------------------
-    public void RotateYaw(float input, float deltaTime)
+    public void RotateYaw(float input, PlayerMovement_ControlData controlData, float deltaTime)
     {
-        float angle = input * _yawSpeed * deltaTime;
+        if (!controlData.EnableYawRotation)
+        {
+            return;
+        }
+
+        float angle = input * _parameterData.YawSpeed * deltaTime;
         transform.Rotate(0.0f, angle, 0.0f, Space.World);
     }
 
@@ -99,7 +95,7 @@ public class Player_Movement : MonoBehaviour
     // --------------------------------------------------
     // ----- Calculate -----
     // --------------------------------------------------
-    private Vector3 CalculateHorizontalAcceleration(Vector2 input, float posture)
+    private Vector3 CalculateHorizontalAcceleration(Vector2 input, float posture, PlayerMovement_ControlData controlData)
     {
         // Y軸回転のみを想定した前方向、右方向
         Vector3 forward = transform.forward;
@@ -114,23 +110,23 @@ public class Player_Movement : MonoBehaviour
         if (input.y >= 0.0f)
         {
             // 頭方向
-            longitudinalAcceleration = input.y * _forwardAcceleration;
+            longitudinalAcceleration = input.y * _parameterData.ForwardAcceleration * controlData.ForwardControlMultiplier;
         }
         else
         {
             // 足方向
-            longitudinalAcceleration = input.y * _backAcceleration;
+            longitudinalAcceleration = input.y * _parameterData.BackAcceleration * controlData.BackControlMultiplier;
         }
 
         // ----- 左右方向 -----
-        float lateralAcceleration = input.x * _sideAcceleration;
+        float lateralAcceleration = input.x * _parameterData.SideAcceleration * controlData.SideControlMultiplier;
 
         // ----- 姿勢による操作性能 -----
-        float postureControl = Mathf.Lerp(_horizontalPostureControl, _verticalPostureControl, posture);
+        float postureControl = Mathf.Lerp(_parameterData.HorizontalPostureControl, _parameterData.VerticalPostureControl, posture);
 
         // ----- 最終算出 -----
         Vector3 acceleration = forward * longitudinalAcceleration + right * lateralAcceleration;
-        acceleration *= postureControl;
+        acceleration *= postureControl * controlData.HorizontalControlMultiplier;
 
         return acceleration;
     }
@@ -138,23 +134,36 @@ public class Player_Movement : MonoBehaviour
     {
         Vector3 horizontalVelocity = new Vector3(_currentVelocity.x, 0.0f, _currentVelocity.z);
         // 速度とは逆方向に抵抗
-        return -horizontalVelocity * _horizontalDrag;
+        return -horizontalVelocity * _parameterData.HorizontalDrag;
     }
-    private float CalculateVerticalAcceleration(float posture)
+    private float CalculateVerticalAcceleration(float posture, PlayerMovement_ControlData controlData)
     {
         // 姿勢に応じた終端速度
-        float terminalFallSpeed = Mathf.Lerp(_horizontalTerminalFallSpeed, _verticalTerminalFallSpeed, posture);
+        float terminalFallSpeed = Mathf.Lerp(_parameterData.HorizontalTerminalFallSpeed, _parameterData.VerticalTerminalFallSpeed, posture);
+        terminalFallSpeed *= controlData.TerminalFallSpeedMultiplier;
 
         // 終端速度から抵抗係数を逆算
-        float verticalDrag = _gravityAcceleration / terminalFallSpeed;
+        float verticalDrag = _parameterData.GravityAcceleration / terminalFallSpeed;
 
         // 重力
-        float gravityAcceleration = -_gravityAcceleration;
+        float gravityAcceleration = -_parameterData.GravityAcceleration;
 
         // 現在速度に対する抵抗
         float dragAcceleration = -_currentVelocity.y * verticalDrag;
 
         return gravityAcceleration + dragAcceleration;
+    }
+
+    // --------------------------------------------------
+    // ----- Public Events -----
+    // --------------------------------------------------
+    public void SetVelocity(Vector3 velocity)
+    {
+        _currentVelocity = velocity;
+    }
+    public void ApplyImpulse(Vector3 velocity)
+    {
+        _currentVelocity += velocity;
     }
 
 }

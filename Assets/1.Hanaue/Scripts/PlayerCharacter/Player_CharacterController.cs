@@ -30,6 +30,7 @@ public class Player_CharacterController : MonoBehaviour
     // --------------------------------------------------
     public Player_InputHandler InputHandler => _input;
     public Player_Movement Movement => _movement;
+    public Player_StateMachine StateMachine => _stateMachine;
     public Player_CollisionDetector CollisionDetector => _collisionDetector;
     public Player_Animation Animation => _animation;
 

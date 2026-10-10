@@ -21,10 +21,16 @@ public abstract class PlayerState_Base
 /*
 public class PlayerState_xxx : PlayerState_Base
 {
+    // --------------------------------------------------
+    // ----- Constructor -----
+    // --------------------------------------------------
     public PlayerState_xxx(Player_CharacterController controller) : base(controller)
     {
     }
 
+    // --------------------------------------------------
+    // ----- Lifecycle -----
+    // --------------------------------------------------
     public override void Enter() { }
     public override void Update() { }
     public override void Exit() { }

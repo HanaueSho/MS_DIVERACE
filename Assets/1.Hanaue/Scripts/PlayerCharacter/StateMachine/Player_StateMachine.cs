@@ -16,6 +16,9 @@ public class Player_StateMachine : MonoBehaviour
     // ----- States -----
     // --------------------------------------------------
     private PlayerState_FreeFall _stateFreeFall;
+    private PlayerState_Damage _stateDamage;
+    public PlayerState_FreeFall StateFreeFall => _stateFreeFall;
+    public PlayerState_Damage StateDamage => _stateDamage;
 
     // --------------------------------------------------
     // ----- CurrentState -----
@@ -23,6 +26,14 @@ public class Player_StateMachine : MonoBehaviour
     private PlayerState_Base _currentState;
     public PlayerState_Base CurrentState => _currentState;
 
+    // --------------------------------------------------
+    // ----- ControlData -----
+    // --------------------------------------------------
+    [Header("Control Data")]
+    [Tooltip("FreeFallState ControlData")]
+    [SerializeField] private PlayerMovement_ControlData _freeFallControlData;
+    [Tooltip("DamageState ControlData")]
+    [SerializeField] private PlayerMovement_ControlData _damageControlData;
 
 
     // --------------------------------------------------
@@ -31,7 +42,8 @@ public class Player_StateMachine : MonoBehaviour
     private void Start()
     {
         _characterController = GetComponent<Player_CharacterController>();
-        _stateFreeFall = new PlayerState_FreeFall(_characterController);
+        _stateFreeFall = new PlayerState_FreeFall(_characterController, _freeFallControlData);
+        _stateDamage = new PlayerState_Damage(_characterController, _damageControlData);
 
         ChangeState(_stateFreeFall);
     }
