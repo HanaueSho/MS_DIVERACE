@@ -150,4 +150,57 @@ public class Player_CollisionDetector : MonoBehaviour
         return PlayerImpactType.Side;
     }
 
+    // --------------------------------------------------
+    // ----- ResolvePenetration -----
+    // --------------------------------------------------
+    public bool ResolvePenetration()
+    {
+        // BoxCollider の中心をワールド座標へ変換
+        Vector3 center = _boxCollider.transform.TransformPoint(_boxCollider.center);
+
+        // Scale 込みの HalfExtents
+        Vector3 lossyScale = _boxCollider.transform.lossyScale;
+        Vector3 halfExtents = _boxCollider.size * 0.5f;
+        halfExtents = Vector3.Scale(halfExtents, new Vector3(Mathf.Abs(lossyScale.x), Mathf.Abs(lossyScale.y), Mathf.Abs(lossyScale.z)));
+        Quaternion orientation = _boxCollider.transform.rotation;
+
+        // 現在の BoxCollider と重なっている Collider を取得
+        Collider[] overlaps = Physics.OverlapBox(center, halfExtents, orientation, ~0, QueryTriggerInteraction.Ignore);
+
+        bool resolved = false;
+        foreach (Collider other in overlaps)
+        {
+            if (other.transform.IsChildOf(transform))
+            {
+                continue;
+            }
+
+            if (!IsTargetCollision(other))
+            {
+                continue;
+            }
+
+            // めり込み量と押し戻し方向を取得
+            bool isPenetrating = Physics.ComputePenetration(
+                                                            _boxCollider,
+                                                            _boxCollider.transform.position,
+                                                            _boxCollider.transform.rotation,
+                                                            other,
+                                                            other.transform.position,
+                                                            other.transform.rotation,
+                                                            out Vector3 pushDirection,
+                                                            out float pushDistance
+                                                           );
+            if (!isPenetrating)
+            {
+                continue;
+            }
+
+            // 最低限めり込みを解消するだけ押し戻す
+            transform.position += pushDirection * (pushDistance + _skinWidth);
+            resolved = true;
+        }
+        return resolved;
+    }
+
 }

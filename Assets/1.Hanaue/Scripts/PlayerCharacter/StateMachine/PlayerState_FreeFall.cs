@@ -33,6 +33,7 @@ public class PlayerState_FreeFall : PlayerState_Base
         // ----- 速度更新 -----
         _controller.Movement.UpdateVelocity(moveInput, postureInput, _controlData,  Time.deltaTime);
         _controller.Movement.RotateYaw(rotateInput, _controlData, Time.deltaTime);
+        _controller.CollisionDetector.ResolvePenetration();
 
         // ----- 移動予定量 -----
         Vector3 displace = _controller.Movement.GetDisplacement(Time.deltaTime);
@@ -49,7 +50,7 @@ public class PlayerState_FreeFall : PlayerState_Base
                 _controller.StateMachine.StateDamage.SetImpactInfo(impactInfo);
             }
             _controller.StateMachine.ChangeState(_controller.StateMachine.StateDamage);
-
+            return;
         }
 
         // ----- 通常移動 -----
@@ -59,4 +60,5 @@ public class PlayerState_FreeFall : PlayerState_Base
         _controller.Animation.RotateTo(postureInput);
     }
     public override void Exit() { }
+
 }

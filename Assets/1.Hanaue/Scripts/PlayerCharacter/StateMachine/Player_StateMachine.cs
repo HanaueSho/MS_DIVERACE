@@ -4,6 +4,12 @@
  */
 using UnityEngine;
 
+public enum PlayerStateName
+{
+    None,
+    FreeFall,
+    Damage,
+}
 
 public class Player_StateMachine : MonoBehaviour
 {
@@ -25,6 +31,12 @@ public class Player_StateMachine : MonoBehaviour
     // --------------------------------------------------
     private PlayerState_Base _currentState;
     public PlayerState_Base CurrentState => _currentState;
+
+    // --------------------------------------------------
+    // ----- CurrentStateName -----
+    // --------------------------------------------------
+    [Header("CurrentStateName")]
+    [SerializeField] PlayerStateName _currentStateName;
 
     // --------------------------------------------------
     // ----- ControlData -----
@@ -68,6 +80,24 @@ public class Player_StateMachine : MonoBehaviour
         _currentState = newState;
 
         _currentState?.Enter();
+
+        ChangeStateName();
+    }
+
+
+    // --------------------------------------------------
+    // ----- Change StateName -----
+    // --------------------------------------------------
+    private void ChangeStateName()
+    {
+        if (_currentState == _stateFreeFall)
+        {
+            _currentStateName = PlayerStateName.FreeFall;
+        }
+        else if (_currentState == _stateDamage)
+        {
+            _currentStateName = PlayerStateName.Damage;
+        }
     }
 
 

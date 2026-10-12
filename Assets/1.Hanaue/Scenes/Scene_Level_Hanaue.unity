@@ -328,6 +328,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7715e52418cd4048a44319cdfc1f598, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player_StateMachine
+  _currentStateName: 0
   _freeFallControlData: {fileID: 11400000, guid: 4dfbccdf6d1ae2a45bdff909e321871b, type: 2}
   _damageControlData: {fileID: 11400000, guid: 4dfbccdf6d1ae2a45bdff909e321871b, type: 2}
 --- !u!114 &667250413
@@ -841,7 +842,7 @@ GameObject:
   - component: {fileID: 1647323516}
   m_Layer: 0
   m_Name: Terrain_01
-  m_TagString: Untagged
+  m_TagString: Obstacle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1062,16 +1063,24 @@ PrefabInstance:
     m_TransformParent: {fileID: 1835563974}
     m_Modifications:
     - target: {fileID: 3513581384153962513, guid: 7ccb9a808df4f864486b2c736eba1ae2, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 3513581384153962513, guid: 7ccb9a808df4f864486b2c736eba1ae2, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 3513581384153962513, guid: 7ccb9a808df4f864486b2c736eba1ae2, type: 3}
       propertyPath: m_LocalPosition.x
       value: -2.3
       objectReference: {fileID: 0}
     - target: {fileID: 3513581384153962513, guid: 7ccb9a808df4f864486b2c736eba1ae2, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -24.1
+      value: -200
       objectReference: {fileID: 0}
     - target: {fileID: 3513581384153962513, guid: 7ccb9a808df4f864486b2c736eba1ae2, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.5
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 3513581384153962513, guid: 7ccb9a808df4f864486b2c736eba1ae2, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1099,6 +1108,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3513581384153962513, guid: 7ccb9a808df4f864486b2c736eba1ae2, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3513581384153962513, guid: 7ccb9a808df4f864486b2c736eba1ae2, type: 3}
+      propertyPath: m_ConstrainProportionsScale
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3792485007397968963, guid: 7ccb9a808df4f864486b2c736eba1ae2, type: 3}
