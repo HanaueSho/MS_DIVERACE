@@ -13,7 +13,7 @@ public class DualSensePcmChannelTest : MonoBehaviour
     [SerializeField] private int leftFrequency = 80;
     [SerializeField] private int rightFrequency = 200;
 
-    private bool hasTested;
+    // private bool hasTested;
 
     private void Start()
     {
@@ -47,14 +47,11 @@ public class DualSensePcmChannelTest : MonoBehaviour
             return;
         }
 
-        Debug.Log(
-            $"左右周波数テスト開始: " +
-            $"Left={leftFrequency}Hz / Right={rightFrequency}Hz"
-        );
+        Debug.Log($"左右周波数テスト開始: " + $"Left={leftFrequency}Hz / Right={rightFrequency}Hz");
 
         PlayStereoPcm(index);
 
-        hasTested = true;
+        // hasTested = true;
     }
 
     private void PlayStereoPcm(int index)
@@ -73,19 +70,13 @@ public class DualSensePcmChannelTest : MonoBehaviour
         {
             float time = i / (float)SampleRate;
 
-            float leftValue =
-                Mathf.Sin(2f * Mathf.PI * leftFrequency * time)
-                * amplitude;
+            float leftValue = Mathf.Sin(2f * Mathf.PI * leftFrequency * time) * amplitude;
 
-            float rightValue =
-                Mathf.Sin(2f * Mathf.PI * rightFrequency * time)
-                * amplitude;
+            float rightValue = Mathf.Sin(2f * Mathf.PI * rightFrequency * time) * amplitude;
 
-            short leftSample =
-                (short)(leftValue * short.MaxValue);
+            short leftSample = (short)(leftValue * short.MaxValue);
 
-            short rightSample =
-                (short)(rightValue * short.MaxValue);
+            short rightSample = (short)(rightValue * short.MaxValue);
 
             samples[i * 2] = leftSample;
             samples[i * 2 + 1] = rightSample;
@@ -93,21 +84,14 @@ public class DualSensePcmChannelTest : MonoBehaviour
 
         int result = GamepadCoreApi.PlayPcm16(index, samples);
 
-        Debug.Log(
-            $"PCM送信完了: " +
-            $"{frameCount} frames / " +
-            $"{duration:F2}s / " +
-            $"Left={leftFrequency}Hz / " +
-            $"Right={rightFrequency}Hz / " +
-            $"amplitude={amplitude:F2} / " +
-            $"result={result}"
-        );
+        Debug.Log($"PCM送信完了: " + $"{frameCount} frames / " + $"{duration:F2}s / " +
+            $"Left={leftFrequency}Hz / " + $"Right={rightFrequency}Hz / " +
+            $"amplitude={amplitude:F2} / " + $"result={result}");
     }
 
     private void OnDisable()
     {
-        if (GamepadCoreApi.IsInitialized &&
-            GamepadCoreApi.ConnectedCount > 0)
+        if (GamepadCoreApi.IsInitialized && GamepadCoreApi.ConnectedCount > 0)
         {
             GamepadCoreApi.StopAudioHaptics(0);
         }
