@@ -246,6 +246,72 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1 &267833721
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 267833723}
+  - component: {fileID: 267833722}
+  - component: {fileID: 267833724}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &267833722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 267833721}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b46f78a4eaaa5a940bdf35484d578a59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DualSenseVibrationTest
+  leftStrength: 1
+  rightStrength: 1
+--- !u!4 &267833723
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 267833721}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &267833724
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 267833721}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54af26e63a717054a9a940d3a13f5bce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DualSenseHapticsPatternTest
+  leftStrength: 1
+  rightStrength: 1
+  weakRatio: 0.25
+  vibrationDuration: 0.2
+  pauseDuration: 0.2
+  repeatCount: 3
+  strengthSteps: 5
 --- !u!1 &331042896
 GameObject:
   m_ObjectHideFlags: 0
@@ -263,7 +329,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &331042898
 Transform:
   m_ObjectHideFlags: 0
@@ -306,10 +372,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4271681a07661994c985dd7a453e530b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DualSensePcmChannelTest
-  duration: 0.5
-  amplitude: 0.5
+  duration: 2
+  amplitude: 1
   leftFrequency: 100
-  rightFrequency: 40
+  rightFrequency: 100
 --- !u!1 &345689253
 GameObject:
   m_ObjectHideFlags: 0
@@ -502,3 +568,4 @@ SceneRoots:
   - {fileID: 2088415460}
   - {fileID: 1742480965}
   - {fileID: 331042898}
+  - {fileID: 267833723}
