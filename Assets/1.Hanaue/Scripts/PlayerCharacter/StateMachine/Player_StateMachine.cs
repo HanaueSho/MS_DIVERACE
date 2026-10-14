@@ -36,6 +36,7 @@ public class Player_StateMachine : MonoBehaviour
     // ----- CurrentStateName -----
     // --------------------------------------------------
     [Header("CurrentStateName")]
+    [Tooltip("CurrentStateName")]
     [SerializeField] PlayerStateName _currentStateName;
 
     // --------------------------------------------------

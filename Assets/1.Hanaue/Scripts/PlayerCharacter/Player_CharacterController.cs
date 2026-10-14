@@ -37,6 +37,8 @@ public class Player_CharacterController : MonoBehaviour
     // --------------------------------------------------
     // ----- ControllerMode -----
     // --------------------------------------------------
+    [Header("ControllerMode")]
+    [Tooltip("現在のコントロール主導権")]
     [SerializeField] private ControllerMode _currentControllerMode = ControllerMode.Manual;
     public ControllerMode CurrentControllerMode => _currentControllerMode;
 

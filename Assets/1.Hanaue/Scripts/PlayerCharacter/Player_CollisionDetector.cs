@@ -39,7 +39,7 @@ public class Player_CollisionDetector : MonoBehaviour
 
 
     // --------------------------------------------------
-    // ----- Collision Parameter -----
+    // ----- Unity Events -----
     // --------------------------------------------------
     private void Awake()
     {
@@ -49,7 +49,7 @@ public class Player_CollisionDetector : MonoBehaviour
         }
         if (_boxCollider == null)
         {
-            Debug.LogError("BoxCollider Not Found !!");
+            Debug.LogError("[Error] BoxCollider Not Found !!");
         }
     }
 
