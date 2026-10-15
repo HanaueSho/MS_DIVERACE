@@ -34,8 +34,8 @@ public class Player_Animation : MonoBehaviour
 
         float rotationX = Mathf.Lerp(90.0f, 180.0f, input);
 
-        Vector3 euler = new Vector3 (rotationX, _body.transform.rotation.eulerAngles.y, _body.transform.rotation.eulerAngles.z);
-        _body.transform.rotation = Quaternion.Euler(euler);
+        Vector3 euler = new Vector3 (rotationX, 0.0f, 0.0f);
+        _body.transform.localRotation = Quaternion.Euler(euler);
     }
 
 

@@ -19,6 +19,8 @@ public class Player_InputHandler : MonoBehaviour
     public float PoseInput { get; private set; }
     public float RotateInput { get; private set; }
 
+    [SerializeField] private float _debugPoseInput;
+
     // --------------------------------------------------
     // ----- PoseInput Property -----
     // --------------------------------------------------
@@ -78,5 +80,7 @@ public class Player_InputHandler : MonoBehaviour
 
         // Gamepad と Keyboard の大きい方を採用する
         PoseInput = Mathf.Max(gamepadInput, _keyboardPoseInput);
+
+        _debugPoseInput = PoseInput;
     }
 }

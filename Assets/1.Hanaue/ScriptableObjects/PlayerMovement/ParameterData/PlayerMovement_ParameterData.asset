@@ -13,12 +13,14 @@ MonoBehaviour:
   m_Name: PlayerMovement_ParameterData
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement_ParameterData
   GravityAcceleration: 50
-  HorizontalTerminalFallSpeed: 100
-  VerticalTerminalFallSpeed: 50
-  ForwardAcceleration: 20
-  SideAcceleration: 15
-  BackAcceleration: 10
-  HorizontalDrag: 2
+  Horizontal_TerminalFallSpeed: 20
+  Vertical_TerminalFallSpeed: 100
+  Horizontal_ForwardAcceleration: 40
+  Horizontal_SideAcceleration: 20
+  Horizontal_BackAcceleration: 10
+  Vertical_ForwardAcceleration: 20
+  Vertical_SideAcceleration: 10
+  Vertical_BackAcceleration: 10
+  Horizontal_HorizontalDrag: 1
+  Vertical_HorizontalDrag: 2
   YawSpeed: 90
-  HorizontalPostureControl: 1
-  VerticalPostureControl: 0.4

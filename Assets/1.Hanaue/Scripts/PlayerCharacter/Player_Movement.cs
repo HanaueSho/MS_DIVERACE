@@ -50,7 +50,7 @@ public class Player_Movement : MonoBehaviour
         }
 
         // 2. 水平方向の抵抗
-        Vector3 horizontalDragAcceleration = CalculateHorizontalDrag();
+        Vector3 horizontalDragAcceleration = CalculateHorizontalDrag(posture);
         _currentVelocity += horizontalDragAcceleration * deltaTime;
 
         // 3. 落下方向の加速度
@@ -105,41 +105,45 @@ public class Player_Movement : MonoBehaviour
         forward.Normalize();
         right.Normalize();
 
+        // 姿勢に応じた加速度
+        float forwardAcceleration = Mathf.Lerp(_parameterData.Horizontal_ForwardAcceleration, _parameterData.Vertical_ForwardAcceleration, posture);
+        float sideAcceleration = Mathf.Lerp(_parameterData.Horizontal_SideAcceleration, _parameterData.Vertical_SideAcceleration, posture);
+        float backAcceleration = Mathf.Lerp(_parameterData.Horizontal_BackAcceleration, _parameterData.Vertical_BackAcceleration, posture);
+
         // ----- 前方向 -----
         float longitudinalAcceleration;
         if (input.y >= 0.0f)
         {
             // 頭方向
-            longitudinalAcceleration = input.y * _parameterData.ForwardAcceleration * controlData.ForwardControlMultiplier;
+            longitudinalAcceleration = input.y * forwardAcceleration * controlData.ForwardControlMultiplier;
         }
         else
         {
             // 足方向
-            longitudinalAcceleration = input.y * _parameterData.BackAcceleration * controlData.BackControlMultiplier;
+            longitudinalAcceleration = input.y * backAcceleration * controlData.BackControlMultiplier;
         }
 
         // ----- 左右方向 -----
-        float lateralAcceleration = input.x * _parameterData.SideAcceleration * controlData.SideControlMultiplier;
-
-        // ----- 姿勢による操作性能 -----
-        float postureControl = Mathf.Lerp(_parameterData.HorizontalPostureControl, _parameterData.VerticalPostureControl, posture);
+        float lateralAcceleration = input.x * sideAcceleration * controlData.SideControlMultiplier;
 
         // ----- 最終算出 -----
         Vector3 acceleration = forward * longitudinalAcceleration + right * lateralAcceleration;
-        acceleration *= postureControl * controlData.HorizontalControlMultiplier;
+        acceleration *= controlData.HorizontalControlMultiplier;
 
         return acceleration;
     }
-    private Vector3 CalculateHorizontalDrag()
+    private Vector3 CalculateHorizontalDrag(float posture)
     {
         Vector3 horizontalVelocity = new Vector3(_currentVelocity.x, 0.0f, _currentVelocity.z);
+        float horizontalDrag = Mathf.Lerp(_parameterData.Horizontal_HorizontalDrag, _parameterData.Vertical_HorizontalDrag, posture); 
+
         // 速度とは逆方向に抵抗
-        return -horizontalVelocity * _parameterData.HorizontalDrag;
+        return -horizontalVelocity * horizontalDrag;
     }
     private float CalculateVerticalAcceleration(float posture, PlayerMovement_ControlData controlData)
     {
         // 姿勢に応じた終端速度
-        float terminalFallSpeed = Mathf.Lerp(_parameterData.HorizontalTerminalFallSpeed, _parameterData.VerticalTerminalFallSpeed, posture);
+        float terminalFallSpeed = Mathf.Lerp(_parameterData.Horizontal_TerminalFallSpeed, _parameterData.Vertical_TerminalFallSpeed, posture);
         terminalFallSpeed *= controlData.TerminalFallSpeedMultiplier;
 
         // 終端速度から抵抗係数を逆算

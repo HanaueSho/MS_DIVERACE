@@ -14,28 +14,36 @@ public class PlayerMovement_ParameterData : ScriptableObject
     [Tooltip("重力加速度")]
     public float GravityAcceleration = 30.0f;
 
-    [Tooltip("水平方向終端速度")]
-    public float HorizontalTerminalFallSpeed = 20.0f;
-    [Tooltip("鉛直方向終端速度")]
-    public float VerticalTerminalFallSpeed = 50.0f;
+    [Tooltip("水平姿勢　終端速度")]
+    public float Horizontal_TerminalFallSpeed = 20.0f;
+    [Tooltip("鉛直姿勢　終端速度")]
+    public float Vertical_TerminalFallSpeed = 50.0f;
 
     // --------------------------------------------------
     // ----- HorizontalMove -----
     // --------------------------------------------------
     [Header("HorizontalMove")]
-    [Tooltip("水平頭方向加速度")]
-    public float ForwardAcceleration = 20.0f;
-    [Tooltip("水平左右方向加速度")]
-    public float SideAcceleration = 15.0f;
-    [Tooltip("水平足方向加速度")]
-    public float BackAcceleration = 10.0f;
+    [Tooltip("水平姿勢　頭方向加速度")]
+    public float Horizontal_ForwardAcceleration = 20.0f;
+    [Tooltip("水平姿勢　左右方向加速度")]
+    public float Horizontal_SideAcceleration = 15.0f;
+    [Tooltip("水平姿勢　足方向加速度")]
+    public float Horizontal_BackAcceleration = 10.0f;
+    [Tooltip("鉛直姿勢　頭方向加速度")]
+    public float Vertical_ForwardAcceleration = 10.0f;
+    [Tooltip("鉛直姿勢　左右方向加速度")]
+    public float Vertical_SideAcceleration = 8.0f;
+    [Tooltip("鉛直姿勢　足方向加速度")]
+    public float Vertical_BackAcceleration = 5.0f;
 
     // --------------------------------------------------
     // ----- Resistance -----
     // --------------------------------------------------
     [Header("Resistance")]
-    [Tooltip("水平方向抗力")]
-    public float HorizontalDrag = 2.0f;
+    [Tooltip("水平姿勢　水平方向抗力")]
+    public float Horizontal_HorizontalDrag = 1.0f;
+    [Tooltip("鉛直姿勢　水平方向抗力")]
+    public float Vertical_HorizontalDrag = 2.0f;
     
     // --------------------------------------------------
     // ----- Rotation -----
@@ -43,13 +51,5 @@ public class PlayerMovement_ParameterData : ScriptableObject
     [Header("Rotation")]
     [Tooltip("姿勢回転速度")]
     public float YawSpeed = 90.0f;
-
-    // --------------------------------------------------
-    // ----- PostureControl -----
-    // --------------------------------------------------
-    [Header("PostureControl")]
-    [Tooltip("姿勢による制御のしやすさ")]
-    public float HorizontalPostureControl = 1.0f;
-    public float VerticalPostureControl = 0.4f;
 
 }
