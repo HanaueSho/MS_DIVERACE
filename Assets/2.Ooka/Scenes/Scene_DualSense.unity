@@ -258,8 +258,12 @@ GameObject:
   - component: {fileID: 267833722}
   - component: {fileID: 267833724}
   - component: {fileID: 267833725}
+  - component: {fileID: 267833726}
+  - component: {fileID: 267833727}
+  - component: {fileID: 267833728}
+  - component: {fileID: 267833729}
   m_Layer: 0
-  m_Name: DualSenseTest
+  m_Name: DualSenseHapticsTest
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -320,7 +324,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 267833721}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 292cdf030deac3a4c995fe7dbba6dd2f, type: 3}
   m_Name: 
@@ -329,6 +333,65 @@ MonoBehaviour:
   amplitude: 0.2
   duration: 0.5
   noiseGain: 2
+--- !u!114 &267833726
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 267833721}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c251e0f0f9bb194f90c8a786150d169, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DualSenseFallHapticsTest
+  maxFallSpeed: 50
+  simulatedFallSpeed: 0
+  minAmplitude: 0.01
+  maxAmplitude: 0.3
+  noiseGain: 2.5
+  clipDuration: 0.5
+--- !u!114 &267833727
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 267833721}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a589530ec9eeee4ab820cd1e4c8677e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HapticsManagerTest
+  hapticsManager: {fileID: 1152704495}
+--- !u!114 &267833728
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 267833721}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c09ef04de5f634448fab7578ab5fa34, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HapticsRequestCallerTest
+  hapticsManager: {fileID: 1152704495}
+--- !u!114 &267833729
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 267833721}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5adc5aaad850e6541a3292629125e116, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HapticsFallSpeedSimulationTest
+  hapticsManager: {fileID: 1152704495}
+  acceleration: 10
+  maxFallSpeed: 50
 --- !u!1 &331042896
 GameObject:
   m_ObjectHideFlags: 0
@@ -529,6 +592,54 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1152704494
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1152704496}
+  - component: {fileID: 1152704495}
+  m_Layer: 0
+  m_Name: HapticsManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1152704495
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1152704494}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5519fcb5c57721a4695b6bea4832b718, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HapticsManager
+  minAmplitude: 0.01
+  maxAmplitude: 0.3
+  noiseGain: 2.5
+  clipDuration: 0.5
+--- !u!4 &1152704496
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1152704494}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1742480964
 GameObject:
   m_ObjectHideFlags: 0
@@ -631,3 +742,4 @@ SceneRoots:
   - {fileID: 331042898}
   - {fileID: 267833723}
   - {fileID: 917480822}
+  - {fileID: 1152704496}
