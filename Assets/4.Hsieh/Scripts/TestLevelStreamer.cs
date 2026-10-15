@@ -25,8 +25,21 @@ public class TestLevelStreamer : MonoBehaviour
     [Range(0.0f, 1.0f)]
     [SerializeField] private float unloadPreviousProgress = 0.5f;
 
+    // 環境エフェクト管理クラスへの参照。
+    private EnvironmentEffectManager _environmentEffectManager;
+
     private int currentLevelIndex;
     private bool isStreaming;
+
+
+    private void Awake()
+    {
+        // Main Sceneにある環境エフェクト管理クラスを取得する。
+        _environmentEffectManager = FindFirstObjectByType<EnvironmentEffectManager>();
+
+        if (_environmentEffectManager == null)
+            Debug.LogWarning("[Warning] EnvironmentEffectManager not found.", this);
+    }
 
     private void Start()
     {
@@ -111,6 +124,10 @@ public class TestLevelStreamer : MonoBehaviour
         isStreaming = true;
 
         currentLevelIndex++;
+
+        // 現在のレベルに対応するパーティクルへ切り替える。
+        if (_environmentEffectManager != null)
+            _environmentEffectManager.SetLevel(currentLevelIndex);
 
         int nextIndex =
             currentLevelIndex + 1;

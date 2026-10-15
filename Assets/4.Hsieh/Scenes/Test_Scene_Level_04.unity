@@ -245,7 +245,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ObjectStressSpawner
   prefabs:
   - {fileID: 9024583507933977988, guid: 2075b1e599739b04c86c9657f9d89871, type: 3}
-  spawnCount: 2000
+  spawnCount: 0
   minPosition: {x: -50, y: -450, z: -50}
   maxPosition: {x: 50, y: 0, z: 50}
   randomRotation: 1
