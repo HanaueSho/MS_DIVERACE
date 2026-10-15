@@ -262,6 +262,8 @@ GameObject:
   - component: {fileID: 267833727}
   - component: {fileID: 267833728}
   - component: {fileID: 267833729}
+  - component: {fileID: 267833730}
+  - component: {fileID: 267833731}
   m_Layer: 0
   m_Name: DualSenseHapticsTest
   m_TagString: Untagged
@@ -384,7 +386,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 267833721}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5adc5aaad850e6541a3292629125e116, type: 3}
   m_Name: 
@@ -392,6 +394,34 @@ MonoBehaviour:
   hapticsManager: {fileID: 1152704495}
   acceleration: 10
   maxFallSpeed: 50
+--- !u!114 &267833730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 267833721}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f70f4fa6930f9942b006ccdc63d14e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HapticsWaveformFrequencyTest
+  hapticsManager: {fileID: 1152704495}
+  intensity: 0.5
+--- !u!114 &267833731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 267833721}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efb64ab0a51c5954ca8ad88727fc8560, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HapticsHorizontalTest
+  hapticsManager: {fileID: 1152704495}
+  intensity: 0.8
 --- !u!1 &331042896
 GameObject:
   m_ObjectHideFlags: 0
@@ -621,10 +651,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5519fcb5c57721a4695b6bea4832b718, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HapticsManager
-  minAmplitude: 0.01
-  maxAmplitude: 0.3
+  minAmplitude: 0.05
+  maxAmplitude: 0.7
   noiseGain: 2.5
   clipDuration: 0.5
+  minHorizontalAmplitude: 0.15
+  maxHorizontalAmplitude: 0.6
+  horizontalFrequencyHz: 50
 --- !u!4 &1152704496
 Transform:
   m_ObjectHideFlags: 0
